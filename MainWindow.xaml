@@ -21,11 +21,13 @@
         <materialDesign:Card Padding="0" Margin="0" Name ="Backgr">
             <Grid AllowDrop="True" Background="GhostWhite" >
                 <Canvas Background="Transparent" Name="jesus" Panel.ZIndex="10">
+                    
                     <Canvas.ContextMenu>
                         <ContextMenu >
                             <MenuItem Header = "Add Dialogue" Click="add_Dialogue"/>
                         </ContextMenu>
                     </Canvas.ContextMenu>
+                    <Label Name="debug"  Content="Label" Canvas.Left="569" Canvas.Top="31"/>
                 </Canvas>
                 
 

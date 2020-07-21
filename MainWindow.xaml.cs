@@ -26,7 +26,11 @@ namespace WpfApp1
         // this variable gives the right click line draw / link functionality to each option
         public ContextMenu cm;
 
-        // Basic constructor initializes the dialogue with AYY 
+        public ContextMenu optionListEdit;
+
+        public bool selectedOpt;
+
+        // Basic constructor 
         public unitDialogue()
         {
             cm = new ContextMenu();
@@ -34,33 +38,64 @@ namespace WpfApp1
             next = new List<unitDialogue>();
             options = new List<StringBuilder>();
             opts = new ListView();
+            optionListEdit = new ContextMenu();
+            selectedOpt = false;
 
             // Adding the default option to link to another dialogue with no. of options as 0;
             MenuItem default_item = new MenuItem();
             default_item.Header = "Default";
             cm.Items.Add(default_item);
+
+
+            // Adding the edit and delete options to the context menu of LISTVIEW for OPTIONS
+            MenuItem edit_option = new MenuItem();
+            edit_option.Header = "Edit";
+            edit_option.Click += editOption;
+
+            MenuItem delete_option = new MenuItem();
+            delete_option.Header = "Delete";
+            delete_option.Click += deleteOption;
+
+            optionListEdit.Items.Add(edit_option);
+            optionListEdit.Items.Add(delete_option);
         }
 
-        public ListView addOption()
+        public void addOption()
         {
             string option_name = " ayyyy";
 
             MenuItem temp = new MenuItem();
             temp.Header = option_name;
+            temp.Click+= linkOption;
             this.cm.Items.Add(temp);
+            this.cm.ContextMenuOpening += link_init;
 
             options.Add(new StringBuilder(option_name));
 
             ListViewItem tempUI = new ListViewItem();
             tempUI.Content = option_name;
+            tempUI.ContextMenu = optionListEdit;
             opts.Items.Add(tempUI);
-
-            return opts;
         }
 
-        public void linkOption()
+        public void link_init(object sender, ContextMenuEventArgs e)
+        {
+            
+        }
+
+        public void editOption(object sender, RoutedEventArgs e)
         {
 
+        }
+
+        public void deleteOption(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        public void linkOption(object sender, RoutedEventArgs e)
+        {
+            
         }
     }
 
@@ -92,6 +127,9 @@ namespace WpfApp1
         Button currOpen;
         unitDialogue currOpenDialog;
 
+        unitDialogue linkfrom;
+        unitDialogue linkto;
+
         
 
         // Dictionary that maps the buttons in the canvas to the (Dialogue String and option properties) unitDialogue object
@@ -113,18 +151,20 @@ namespace WpfApp1
             enterDialogue = new TextBox();
             enterDialogue.Style = (Style)Application.Current.FindResource("MaterialDesignFilledTextFieldTextBox");
             enterDialogue.TextWrapping = TextWrapping.Wrap;
+            enterDialogue.Margin = new Thickness(5, 0, 5, 10);
             hmm.Children.Add(enterDialogue);
 
             InitializeComponent();
 
-            
-
+            linkfrom = null;
+            linkto = null;
 
             addOptBtn = new Button();
             addOptBtn.Height = 32;
             addOptBtn.Width = 150;
             addOptBtn.Style = (Style)this.FindResource("MaterialDesignFlatMidBgButton");
             addOptBtn.Content = "Add Options ";
+            addOptBtn.Margin = new Thickness(0, 0, 5, 10);
 
             //SidePanel.Children.Add(addOptBtn);
             addOptBtn.Click += add_option;
@@ -132,7 +172,6 @@ namespace WpfApp1
             hmm.Children.Add(addOptBtn);
 
             SidePanel.Children.Add(hmm);
-
 
             /*TRIAL
             Line line = new Line();
@@ -210,26 +249,46 @@ namespace WpfApp1
             dynamic a;
             Button_obj_Map.TryGetValue(pointa, out a);
             pointa.ContextMenu = a.cm;
-            
+            pointa.ContextMenuOpening += linkfrom_init;
+            pointa.ContextMenuClosing += problem_handler;
         }
         
-        private void btn_simpleclick(object sender, RoutedEventArgs e)
+        public void linkfrom_init(object sender, ContextMenuEventArgs e)
         {
-
             dynamic a;
-            if (currOpen != null)
+            Button temp = sender as Button;
+            Button_obj_Map.TryGetValue(temp, out a);       
+            linkfrom = a;
+            debug.Content = (linkfrom.dialogue.ToString());
+        }
+        public void problem_handler(object sender, ContextMenuEventArgs e)
+        {
+            if (linkfrom.selectedOpt == false)
             {
-                Button_obj_Map.TryGetValue(currOpen, out a);
-                a.dialogue.Clear();
-                a.dialogue.Append(enterDialogue.Text);
+                linkfrom = null;
             }
 
-            Button temp = sender as Button;
-            currOpen = temp;
-            Button_obj_Map.TryGetValue(temp, out a);
-            currOpenDialog = a;
-            enterDialogue.Text = a.dialogue.ToString();
+            debug.Content = "NULL";
+        }
+        private void btn_simpleclick(object sender, RoutedEventArgs e)
+        {
+            if (linkfrom == null)
+            {
+                dynamic a;
+                if (currOpen != null)
+                {
+                    Button_obj_Map.TryGetValue(currOpen, out a);
+                    a.dialogue.Clear();
+                    a.dialogue.Append(enterDialogue.Text);
+                }
 
+                Button temp = sender as Button;
+                currOpen = temp;
+                Button_obj_Map.TryGetValue(temp, out a);
+                currOpenDialog = a;
+                enterDialogue.Text = a.dialogue.ToString();
+                refresher();
+            }
         }
 
         private void btn_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
