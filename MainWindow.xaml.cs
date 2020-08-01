@@ -5,49 +5,90 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 
-
 namespace WpfApp1
 {
 
-    // This is the basic unit of a dialogue,
     public class unitDialogue
     {
-        // this variable holds the main dialogue
+
         public StringBuilder dialogue;
 
-        // this variable holds the string val of each option
         public List<StringBuilder> options;
 
-        // FIX LATER //this variable holds the list of pointers to which each option points
         public List<unitDialogue> next;
 
-        public ListView opts;
-
-        // this variable gives the right click line draw / link functionality to each option
         public ContextMenu cm;
 
-        public ContextMenu optionListEdit;
-
-        public bool selectedOpt;
-
-        // Basic constructor 
         public unitDialogue()
         {
-            cm = new ContextMenu();
             dialogue = new StringBuilder("AYYY");
             next = new List<unitDialogue>();
             options = new List<StringBuilder>();
+            cm = new ContextMenu();
+        }
+
+        public ContextMenu ContextBuilder()
+        {
+            cm.Items.Clear();
+            for(int i = 0; i < options.Count; i++)
+            {
+                MenuItem lmao = new MenuItem();
+                lmao.Header = options[i];
+                cm.Items.Add(lmao);
+            }
+            return cm;
+        }
+    }
+
+    public class edge
+    {
+        public Point start;
+        public Point end;
+        public string optname;
+    }
+
+    public class DialogueEditor
+    {
+        public unitDialogue open;
+        public StackPanel hmm;
+        public TextBox enterDialogue;
+        public Button addOpt;
+        public ListView opts;
+        public ContextMenu editOpts;
+        
+        public DialogueEditor()
+        {
+            open = null;
+            hmm = new StackPanel();
             opts = new ListView();
-            optionListEdit = new ContextMenu();
-            selectedOpt = false;
+            enterDialogueInit();
+            editOptsInit();
+            addOptInit();
+            refresher();
+        }
 
-            // Adding the default option to link to another dialogue with no. of options as 0;
-            MenuItem default_item = new MenuItem();
-            default_item.Header = "Default";
-            cm.Items.Add(default_item);
+        public void enterDialogueInit()
+        {
+            enterDialogue = new TextBox();
+            enterDialogue.Style = (Style)Application.Current.FindResource("MaterialDesignFilledTextFieldTextBox");
+            enterDialogue.TextWrapping = TextWrapping.Wrap;
+            enterDialogue.Margin = new Thickness(5, 0, 5, 10);
+        }
 
+        public void addOptInit()
+        {
+            addOpt = new Button();
+            addOpt.Height = 32;
+            addOpt.Width = 150;
+            addOpt.Style = (Style)Application.Current.FindResource("MaterialDesignFlatMidBgButton");
+            addOpt.Content = "Add Options ";
+            addOpt.Margin = new Thickness(0, 0, 5, 10);
+            addOpt.Click+= addOption;
+        }
 
-            // Adding the edit and delete options to the context menu of LISTVIEW for OPTIONS
+        public void editOptsInit()
+        {
+            editOpts = new ContextMenu();
             MenuItem edit_option = new MenuItem();
             edit_option.Header = "Edit";
             edit_option.Click += editOption;
@@ -56,31 +97,15 @@ namespace WpfApp1
             delete_option.Header = "Delete";
             delete_option.Click += deleteOption;
 
-            optionListEdit.Items.Add(edit_option);
-            optionListEdit.Items.Add(delete_option);
+            editOpts.Items.Add(edit_option);
+            editOpts.Items.Add(delete_option);
         }
 
-        public void addOption()
+        public void addOption(object Sender, RoutedEventArgs e)
         {
-            string option_name = " ayyyy";
-
-            MenuItem temp = new MenuItem();
-            temp.Header = option_name;
-            temp.Click+= linkOption;
-            this.cm.Items.Add(temp);
-            this.cm.ContextMenuOpening += link_init;
-
-            options.Add(new StringBuilder(option_name));
-
-            ListViewItem tempUI = new ListViewItem();
-            tempUI.Content = option_name;
-            tempUI.ContextMenu = optionListEdit;
-            opts.Items.Add(tempUI);
-        }
-
-        public void link_init(object sender, ContextMenuEventArgs e)
-        {
-            
+            open.options.Add(new StringBuilder("ayy"));
+            open.ContextBuilder();
+            listBuilder(open);
         }
 
         public void editOption(object sender, RoutedEventArgs e)
@@ -93,19 +118,44 @@ namespace WpfApp1
 
         }
 
-        public void linkOption(object sender, RoutedEventArgs e)
+        public void refresher()
         {
-            
+            hmm.Children.Clear();
+            hmm.Children.Add(enterDialogue);
+            hmm.Children.Add(addOpt);
+            hmm.Children.Add(opts);
+        }
+
+        public void listBuilder(unitDialogue pointa)
+        {
+            opts.Items.Clear();
+            hmm.Children.Remove(opts);
+            for(int i = 0; i < pointa.options.Count; i++)
+            {
+                opts.Items.Add(listItemBuilder(pointa.options[i].ToString()));
+            }
+            hmm.Children.Add(opts);
+        }
+
+        public ListViewItem listItemBuilder(String text)
+        {
+            ListViewItem temp = new ListViewItem();
+            temp.Content = text;
+            temp.ContextMenu = editOpts;
+            return temp;
+        }
+
+        public void refresher(unitDialogue pointa)
+        {
+            open = pointa;
+            hmm.Children.Clear();
+            enterDialogue.Text = pointa.dialogue.ToString();
+            hmm.Children.Add(enterDialogue);
+            hmm.Children.Add(addOpt);
+            listBuilder(pointa);
+           
         }
     }
-
-    public class edge
-    {
-        public Point start;
-        public Point end;
-        public string optname;
-    }
-
 
 
 
@@ -115,63 +165,32 @@ namespace WpfApp1
         Control draggedItem;
         Point itemRelativePosition;
         bool IsDragging;
+        bool selectedItem;
 
-        // These three elements are common to the bottom half part of the editor for adding text and options to a dialog
-        // hmm is the stackpanel that holds the above two elements
-        TextBox enterDialogue;
-        Button addOptBtn;
-        StackPanel hmm;
-
+        DialogueEditor only;
         
         // These two variables keep track of the current dialogue thats being shown in the bottom Editor part of the App
-        Button currOpen;
-        unitDialogue currOpenDialog;
-
         unitDialogue linkfrom;
         unitDialogue linkto;
-
-        
 
         // Dictionary that maps the buttons in the canvas to the (Dialogue String and option properties) unitDialogue object
         Dictionary<Button, object> Button_obj_Map;
 
         unitDialogue head;
 
-        public int params_net;
-
         public MainWindow()
         {
-            currOpen = null;
-            currOpenDialog = null;
+            only = new DialogueEditor();
             head = null;
             IsDragging = false;
             Button_obj_Map = new Dictionary<Button, object>();
-            hmm = new StackPanel();
-
-            enterDialogue = new TextBox();
-            enterDialogue.Style = (Style)Application.Current.FindResource("MaterialDesignFilledTextFieldTextBox");
-            enterDialogue.TextWrapping = TextWrapping.Wrap;
-            enterDialogue.Margin = new Thickness(5, 0, 5, 10);
-            hmm.Children.Add(enterDialogue);
+            selectedItem = false;
 
             InitializeComponent();
 
             linkfrom = null;
             linkto = null;
-
-            addOptBtn = new Button();
-            addOptBtn.Height = 32;
-            addOptBtn.Width = 150;
-            addOptBtn.Style = (Style)this.FindResource("MaterialDesignFlatMidBgButton");
-            addOptBtn.Content = "Add Options ";
-            addOptBtn.Margin = new Thickness(0, 0, 5, 10);
-
-            //SidePanel.Children.Add(addOptBtn);
-            addOptBtn.Click += add_option;
-
-            hmm.Children.Add(addOptBtn);
-
-            SidePanel.Children.Add(hmm);
+            SidePanel.Children.Add(only.hmm);
 
             /*TRIAL
             Line line = new Line();
@@ -181,30 +200,8 @@ namespace WpfApp1
             line.Y1 = 0;
             line.Y2 = 500;
             jesus.Children.Add(line);*/
-
         }
 
-        public void add_option(object sender, RoutedEventArgs e)
-        {
-            if (currOpenDialog != null)
-            {
-                currOpenDialog.addOption();
-                refresher();
-            }
-            
-        }
-
-        public void refresher()
-        {
-            SidePanel.Children.Clear();
-            hmm.Children.Clear();
-            hmm.Children.Add(enterDialogue);
-            hmm.Children.Add(addOptBtn);
-            hmm.Children.Add(currOpenDialog.opts);
-            SidePanel.Children.Add(hmm);
-        }
-
-        // For addition operations with a right click context menu 
 
         private void add_Dialogue(object sender, RoutedEventArgs e)
         {
@@ -224,11 +221,8 @@ namespace WpfApp1
             Canvas.SetTop(newBtn, p.Y - 10);
             jesus.Children.Add(newBtn);
 
-
-
             if (head == null)
                 head = obj;
-
 
         }
 
@@ -248,6 +242,7 @@ namespace WpfApp1
 
             dynamic a;
             Button_obj_Map.TryGetValue(pointa, out a);
+            unitDialogue temp = a as unitDialogue;
             pointa.ContextMenu = a.cm;
             pointa.ContextMenuOpening += linkfrom_init;
             pointa.ContextMenuClosing += problem_handler;
@@ -261,33 +256,41 @@ namespace WpfApp1
             linkfrom = a;
             debug.Content = (linkfrom.dialogue.ToString());
         }
+
         public void problem_handler(object sender, ContextMenuEventArgs e)
         {
-            if (linkfrom.selectedOpt == false)
+            if (selectedItem == false)
             {
                 linkfrom = null;
+                debug.Content = "NULL";
             }
-
-            debug.Content = "NULL";
         }
+
         private void btn_simpleclick(object sender, RoutedEventArgs e)
         {
+            Button temp = sender as Button;
+            dynamic a;
+            Button_obj_Map.TryGetValue(temp, out a);
             if (linkfrom == null)
             {
-                dynamic a;
-                if (currOpen != null)
+                
+                if (only.open != null)
                 {
-                    Button_obj_Map.TryGetValue(currOpen, out a);
-                    a.dialogue.Clear();
-                    a.dialogue.Append(enterDialogue.Text);
+                    only.open.dialogue.Clear();
+                    only.open.dialogue.Append(only.enterDialogue.Text);
                 }
 
-                Button temp = sender as Button;
-                currOpen = temp;
                 Button_obj_Map.TryGetValue(temp, out a);
-                currOpenDialog = a;
-                enterDialogue.Text = a.dialogue.ToString();
-                refresher();
+                only.open = a as unitDialogue;
+                only.refresher(only.open);
+
+            }
+            else
+            {
+                linkto = a;
+                linkfrom.next.Add(linkto);
+                linkfrom = a;
+                linkto = null;
             }
         }
 
@@ -322,5 +325,23 @@ namespace WpfApp1
             Canvas.SetTop(draggedItem, canvasRelativePosition.Y - itemRelativePosition.Y);
             Canvas.SetLeft(draggedItem, canvasRelativePosition.X - itemRelativePosition.X);
         }    
+
+        public ContextMenu contextGenerator (unitDialogue pointa)
+        {
+            ContextMenu temp = new ContextMenu();
+            if (pointa.options.Count == 0)
+            {
+                temp.Items.Add(menuItemGenerator("Default"));
+            }
+            return temp;
+        }
+               
+
+        public MenuItem menuItemGenerator(String text)
+        {
+            MenuItem temp = new MenuItem();
+            temp.Header = text;
+            return temp;
+        }
     }   
 }
