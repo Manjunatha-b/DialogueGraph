@@ -16,7 +16,7 @@ namespace WpfApp1
 
         public List<path> paths;
 
-        public List<unitDialogue> from;
+        public List<path> from;
 
         public ContextMenu cm;
 
@@ -28,7 +28,7 @@ namespace WpfApp1
             paths = new List<path>();
             cm = new ContextMenu();
             contextItemSelected = -1;
-            from = new List<unitDialogue>();
+            from = new List<path>();
 
             MenuItem lmao = new MenuItem();
             lmao.Header = "Default";
@@ -62,7 +62,7 @@ namespace WpfApp1
         public void pathLinker(unitDialogue to)
         {
             paths[contextItemSelected].next = to;
-            to.from.Add(this);
+            to.from.Add(this.paths[contextItemSelected]);
         }
 
     }
@@ -71,10 +71,12 @@ namespace WpfApp1
     {
         public StringBuilder optname;
         public unitDialogue next;
+        public Line line;
 
         public path(String text)
         {
             optname = new StringBuilder(text);
+            line = null;
             next = null;
         }
     }
@@ -200,7 +202,6 @@ namespace WpfApp1
         Control draggedItem;
         Point itemRelativePosition;
         bool IsDragging;
-        bool selectedItem;
 
         DialogueEditor only;
         
@@ -219,7 +220,6 @@ namespace WpfApp1
             head = null;
             IsDragging = false;
             Button_obj_Map = new Dictionary<Button, object>();
-            selectedItem = false;
 
             InitializeComponent();
 
@@ -320,7 +320,7 @@ namespace WpfApp1
 
                 debug.Content = (linkfrom.paths[0].next.dialogue);
                 lineCreator(linkfrom, linkto);
-
+                
                 linkfrom = null;
                 linkto = null;
             }
@@ -357,7 +357,9 @@ namespace WpfApp1
             Canvas.SetTop(draggedItem, canvasRelativePosition.Y - itemRelativePosition.Y);
             Canvas.SetLeft(draggedItem, canvasRelativePosition.X - itemRelativePosition.X);
 
-            
+            Button temp = sender as Button;
+
+            lineUpdater(temp, e);
             
         }
 
@@ -387,18 +389,31 @@ namespace WpfApp1
             double X2 = Canvas.GetLeft(temp2) + 75;
             double Y2 = Canvas.GetTop(temp2) + 16;
 
-            debug.Content = X1 + " " + Y1 + " " + X2 + " " + Y2;
-
             line.X1 = X1;
             line.Y1 = Y1;
             line.X2 = X2;
             line.Y2 = Y2;
 
+            line.StrokeThickness = 3;
+
+            linkfrom.paths[linkfrom.contextItemSelected].line = line;
+
             jesus.Children.Add(line);
         }
 
-        public void lineUpdater(Button temp)
+        public void lineUpdater(Button temp, MouseEventArgs e)
         {
+            dynamic a;
+            Button_obj_Map.TryGetValue(temp, out a);
+            unitDialogue slave = a as unitDialogue;
+            Point lmao = e.GetPosition(temp);
+            Point canvasRelativePosition = e.GetPosition(jesus);
+            for (int i = 0; i < slave.from.Count; i++)
+            {
+                
+                slave.from[i].line.X2 = canvasRelativePosition.X-lmao.X + 75;
+                slave.from[i].line.Y2 = canvasRelativePosition.Y-lmao.Y + 16;
+            }
 
         }
 
