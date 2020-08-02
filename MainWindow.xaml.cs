@@ -13,38 +13,70 @@ namespace WpfApp1
 
         public StringBuilder dialogue;
 
-        public List<StringBuilder> options;
+        public List<path> paths;
 
         public List<unitDialogue> next;
 
         public ContextMenu cm;
 
+        public int contextItemSelected;
+
         public unitDialogue()
         {
             dialogue = new StringBuilder("AYYY");
             next = new List<unitDialogue>();
-            options = new List<StringBuilder>();
+            paths = new List<path>();
             cm = new ContextMenu();
+            contextItemSelected = -1;
+
+            MenuItem lmao = new MenuItem();
+            lmao.Header = "Default";
+            lmao.Click+=linker;
+            lmao.Tag = 0;
+            cm.Items.Add(lmao);
+            paths.Add(new path("Default"));
         }
 
-        public ContextMenu ContextBuilder()
+        public void ContextBuilder()
         {
             cm.Items.Clear();
-            for(int i = 0; i < options.Count; i++)
+            for (int i = 0; i < paths.Count; i++)
             {
                 MenuItem lmao = new MenuItem();
-                lmao.Header = options[i];
+                lmao.Header = paths[i].optname.ToString();
+                lmao.Click+= linker;
+                lmao.Tag = i;
                 cm.Items.Add(lmao);
             }
-            return cm;
         }
+
+        public void linker(object sender, RoutedEventArgs e)
+        {
+            MenuItem temp = sender as MenuItem;
+            int index = int.Parse(temp.Tag.ToString());
+            
+            contextItemSelected = index;
+        }
+
+        public void pathLinker(unitDialogue to)
+        {
+            paths[contextItemSelected].next = to;
+        }
+
     }
 
-    public class edge
+    public class path
     {
-        public Point start;
-        public Point end;
-        public string optname;
+        public StringBuilder optname;
+        public unitDialogue next;
+
+        
+
+        public path(String text)
+        {
+            optname = new StringBuilder(text);
+            next = null;
+        }
     }
 
     public class DialogueEditor
@@ -103,7 +135,9 @@ namespace WpfApp1
 
         public void addOption(object Sender, RoutedEventArgs e)
         {
-            open.options.Add(new StringBuilder("ayy"));
+            if (open.paths.Count==1 && open.paths[0].optname.ToString().Equals("Default"))
+                open.paths.Clear();
+            open.paths.Add(new path("ayy"));
             open.ContextBuilder();
             listBuilder(open);
         }
@@ -130,9 +164,9 @@ namespace WpfApp1
         {
             opts.Items.Clear();
             hmm.Children.Remove(opts);
-            for(int i = 0; i < pointa.options.Count; i++)
+            for(int i = 0; i < pointa.paths.Count; i++)
             {
-                opts.Items.Add(listItemBuilder(pointa.options[i].ToString()));
+                opts.Items.Add(listItemBuilder(pointa.paths[i].optname.ToString()));
             }
             hmm.Children.Add(opts);
         }
@@ -192,20 +226,13 @@ namespace WpfApp1
             linkto = null;
             SidePanel.Children.Add(only.hmm);
 
-            /*TRIAL
-            Line line = new Line();
-            line.Stroke = System.Windows.Media.Brushes.LightSteelBlue;
-            line.X1 = 0;
-            line.X2 = 100;
-            line.Y1 = 0;
-            line.Y2 = 500;
-            jesus.Children.Add(line);*/
+            
         }
 
 
         private void add_Dialogue(object sender, RoutedEventArgs e)
         {
-            System.Windows.Controls.Button newBtn = new Button();
+            Button newBtn = new Button();
             newBtn.Height = 32;
             newBtn.Width = 150;
             newBtn.Style = (Style)this.FindResource("MaterialDesignFlatMidBgButton");
@@ -226,15 +253,10 @@ namespace WpfApp1
 
         }
 
-        // This is for all button operations 
-
-
         private void btn_mapper(object sender)
         {
-
             Button pointa = sender as Button;
             pointa.Click += btn_simpleclick;
-
 
             pointa.PreviewMouseLeftButtonDown += btn_PreviewMouseLeftButtonDown;
             pointa.PreviewMouseLeftButtonUp += btn_PreviewMouseLeftButtonUp;
@@ -259,11 +281,17 @@ namespace WpfApp1
 
         public void problem_handler(object sender, ContextMenuEventArgs e)
         {
-            if (selectedItem == false)
+            Button temp = sender as Button;
+            if(linkfrom.contextItemSelected == -1)
             {
                 linkfrom = null;
                 debug.Content = "NULL";
             }
+            else
+            {
+                debug.Content = linkfrom.contextItemSelected;
+            }
+            
         }
 
         private void btn_simpleclick(object sender, RoutedEventArgs e)
@@ -288,8 +316,10 @@ namespace WpfApp1
             else
             {
                 linkto = a;
-                linkfrom.next.Add(linkto);
-                linkfrom = a;
+                linkfrom.pathLinker(linkto);
+
+                debug.Content = (linkfrom.paths[0].next.dialogue);
+                linkfrom = null;
                 linkto = null;
             }
         }
@@ -324,24 +354,20 @@ namespace WpfApp1
 
             Canvas.SetTop(draggedItem, canvasRelativePosition.Y - itemRelativePosition.Y);
             Canvas.SetLeft(draggedItem, canvasRelativePosition.X - itemRelativePosition.X);
-        }    
-
-        public ContextMenu contextGenerator (unitDialogue pointa)
-        {
-            ContextMenu temp = new ContextMenu();
-            if (pointa.options.Count == 0)
-            {
-                temp.Items.Add(menuItemGenerator("Default"));
-            }
-            return temp;
         }
-               
 
-        public MenuItem menuItemGenerator(String text)
+        /*TRIAL
+            Line line = new Line();
+            line.Stroke = System.Windows.Media.Brushes.LightSteelBlue;
+            line.X1 = 0;
+            line.X2 = 100;
+            line.Y1 = 0;
+            line.Y2 = 500;
+            jesus.Children.Add(line);*/
+
+        public void lineUpdater(unitDialogue from, unitDialogue to)
         {
-            MenuItem temp = new MenuItem();
-            temp.Header = text;
-            return temp;
+            jesus.Children.
         }
-    }   
+    }
 }
