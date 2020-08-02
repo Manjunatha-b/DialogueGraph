@@ -64,7 +64,6 @@ namespace WpfApp1
             paths[contextItemSelected].next = to;
             to.from.Add(this.paths[contextItemSelected]);
         }
-
     }
 
     public class path
@@ -138,8 +137,12 @@ namespace WpfApp1
 
         public void addOption(object Sender, RoutedEventArgs e)
         {
-            if (open.paths.Count==1 && open.paths[0].optname.ToString().Equals("Default"))
+            if (open.paths.Count == 1 && open.paths[0].optname.ToString().Equals("Default"))
+            {
+                
                 open.paths.Clear();
+               
+            }
             open.paths.Add(new path("ayy"));
             open.ContextBuilder();
             listBuilder(open);
@@ -169,7 +172,7 @@ namespace WpfApp1
             hmm.Children.Remove(opts);
             for(int i = 0; i < pointa.paths.Count; i++)
             {
-                opts.Items.Add(listItemBuilder(pointa.paths[i].optname.ToString()));
+                opts.Items.Add(listItemBuilder(pointa.paths[i].optname.ToString()+"\t\t\t"+(pointa.paths[i].next==null?"NULL":pointa.paths[i].next.ToString())));
             }
             hmm.Children.Add(opts);
         }
@@ -363,15 +366,6 @@ namespace WpfApp1
             
         }
 
-        /*TRIAL
-            Line line = new Line();
-            line.Stroke = System.Windows.Media.Brushes.LightSteelBlue;
-            line.X1 = 0;
-            line.X2 = 100;
-            line.Y1 = 0;
-            line.Y2 = 500;
-            jesus.Children.Add(line);*/
-
         public void lineCreator(unitDialogue from, unitDialogue to)
         {
             
@@ -394,12 +388,19 @@ namespace WpfApp1
             line.X2 = X2;
             line.Y2 = Y2;
 
-            line.StrokeThickness = 3;
-
+            line.StrokeThickness = 5;
+            line.Tag = from;
+            line.MouseRightButtonDown+= new MouseButtonEventHandler(lineDeleter);
             linkfrom.paths[linkfrom.contextItemSelected].line = line;
 
             jesus.Children.Add(line);
         }
+        public void lineDeleter(object sender, MouseEventArgs e)
+        {
+            Line temp = sender as Line;
+            jesus.Children.Remove(temp);
+        }
+
 
         public void lineUpdater(Button temp, MouseEventArgs e)
         {
@@ -410,11 +411,18 @@ namespace WpfApp1
             Point canvasRelativePosition = e.GetPosition(jesus);
             for (int i = 0; i < slave.from.Count; i++)
             {
-                
                 slave.from[i].line.X2 = canvasRelativePosition.X-lmao.X + 75;
                 slave.from[i].line.Y2 = canvasRelativePosition.Y-lmao.Y + 16;
             }
 
+            for (int i = 0; i < slave.paths.Count; i++)
+            {
+                if (slave.paths[i].line != null)
+                {
+                    slave.paths[i].line.X1 = canvasRelativePosition.X - lmao.X + 75;
+                    slave.paths[i].line.Y1 = canvasRelativePosition.Y - lmao.Y + 16;
+                }
+            }
         }
 
         public Button getKey(unitDialogue param)
