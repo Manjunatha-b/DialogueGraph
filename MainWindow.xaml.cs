@@ -4,6 +4,7 @@ using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Shapes;
 
 namespace WpfApp1
 {
@@ -15,7 +16,7 @@ namespace WpfApp1
 
         public List<path> paths;
 
-        public List<unitDialogue> next;
+        public List<unitDialogue> from;
 
         public ContextMenu cm;
 
@@ -24,10 +25,10 @@ namespace WpfApp1
         public unitDialogue()
         {
             dialogue = new StringBuilder("AYYY");
-            next = new List<unitDialogue>();
             paths = new List<path>();
             cm = new ContextMenu();
             contextItemSelected = -1;
+            from = new List<unitDialogue>();
 
             MenuItem lmao = new MenuItem();
             lmao.Header = "Default";
@@ -61,6 +62,7 @@ namespace WpfApp1
         public void pathLinker(unitDialogue to)
         {
             paths[contextItemSelected].next = to;
+            to.from.Add(this);
         }
 
     }
@@ -70,14 +72,13 @@ namespace WpfApp1
         public StringBuilder optname;
         public unitDialogue next;
 
-        
-
         public path(String text)
         {
             optname = new StringBuilder(text);
             next = null;
         }
     }
+
 
     public class DialogueEditor
     {
@@ -226,7 +227,6 @@ namespace WpfApp1
             linkto = null;
             SidePanel.Children.Add(only.hmm);
 
-            
         }
 
 
@@ -319,6 +319,8 @@ namespace WpfApp1
                 linkfrom.pathLinker(linkto);
 
                 debug.Content = (linkfrom.paths[0].next.dialogue);
+                lineCreator(linkfrom, linkto);
+
                 linkfrom = null;
                 linkto = null;
             }
@@ -354,6 +356,9 @@ namespace WpfApp1
 
             Canvas.SetTop(draggedItem, canvasRelativePosition.Y - itemRelativePosition.Y);
             Canvas.SetLeft(draggedItem, canvasRelativePosition.X - itemRelativePosition.X);
+
+            
+            
         }
 
         /*TRIAL
@@ -365,9 +370,47 @@ namespace WpfApp1
             line.Y2 = 500;
             jesus.Children.Add(line);*/
 
-        public void lineUpdater(unitDialogue from, unitDialogue to)
+        public void lineCreator(unitDialogue from, unitDialogue to)
         {
-            jesus.Children.
+            
+
+            Button temp1 = getKey(from);
+            Button temp2 = getKey(to);
+            Line line = new Line();
+            line.Stroke = System.Windows.Media.Brushes.LightSteelBlue;
+
+            Canvas.SetZIndex(line, -1);
+
+            double X1 = Canvas.GetLeft(temp1) + 75;
+            double Y1 = Canvas.GetTop(temp1) + 16;
+
+            double X2 = Canvas.GetLeft(temp2) + 75;
+            double Y2 = Canvas.GetTop(temp2) + 16;
+
+            debug.Content = X1 + " " + Y1 + " " + X2 + " " + Y2;
+
+            line.X1 = X1;
+            line.Y1 = Y1;
+            line.X2 = X2;
+            line.Y2 = Y2;
+
+            jesus.Children.Add(line);
+        }
+
+        public void lineUpdater(Button temp)
+        {
+
+        }
+
+        public Button getKey(unitDialogue param)
+        {
+            Button temp = null;
+            foreach(KeyValuePair<Button, object> entry in Button_obj_Map)
+            {
+                if (entry.Value == param)
+                    temp = entry.Key;
+            }
+            return temp;
         }
     }
 }
