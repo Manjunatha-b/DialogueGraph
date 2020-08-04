@@ -389,7 +389,10 @@ namespace WpfApp1
             line.Y2 = Y2;
 
             line.StrokeThickness = 5;
-            line.Tag = from;
+            List<unitDialogue> connx = new List<unitDialogue>();
+            connx.Add(from);
+            connx.Add(to);
+            line.Tag = connx;
             line.MouseRightButtonDown+= new MouseButtonEventHandler(lineDeleter);
             linkfrom.paths[linkfrom.contextItemSelected].line = line;
 
@@ -398,6 +401,34 @@ namespace WpfApp1
         public void lineDeleter(object sender, MouseEventArgs e)
         {
             Line temp = sender as Line;
+            List<unitDialogue> lmao1 = temp.Tag as List<unitDialogue>;
+
+            int indexToDelete1 = -1;
+            int indexToDelete2 = -1;
+            
+            for(int i = 0; i < lmao1[0].paths.Count; i++)
+            {
+                if (lmao1[0].paths[i].line.Equals(temp))
+                {
+                    indexToDelete1 = i;
+                    break;
+                }
+            }
+
+            for (int i = 0; i < lmao1[1].from.Count; i++)
+            {
+                if (lmao1[1].from[i].line.Equals(temp))
+                {
+                    indexToDelete2 = i;
+                    break;
+                }
+            }
+
+            lmao1[0].paths[indexToDelete1].line = null;
+            lmao1[0].paths[indexToDelete1].next = null;
+            lmao1[1].from.RemoveAt(indexToDelete2);
+
+
             jesus.Children.Remove(temp);
         }
 
@@ -411,6 +442,7 @@ namespace WpfApp1
             Point canvasRelativePosition = e.GetPosition(jesus);
             for (int i = 0; i < slave.from.Count; i++)
             {
+                //if(slave.from[i].Count)
                 slave.from[i].line.X2 = canvasRelativePosition.X-lmao.X + 75;
                 slave.from[i].line.Y2 = canvasRelativePosition.Y-lmao.Y + 16;
             }
