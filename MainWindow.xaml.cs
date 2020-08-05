@@ -83,6 +83,7 @@ namespace WpfApp1
 
     public class DialogueEditor
     {
+        public MainWindow mw;
         public unitDialogue open;
         public StackPanel hmm;
         public TextBox enterDialogue;
@@ -92,6 +93,7 @@ namespace WpfApp1
         
         public DialogueEditor()
         {
+            mw = (MainWindow)Application.Current.MainWindow;
             open = null;
             hmm = new StackPanel();
             opts = new ListView();
@@ -139,7 +141,10 @@ namespace WpfApp1
         {
             if (open.paths.Count == 1 && open.paths[0].optname.ToString().Equals("Default"))
             {
-                
+                if (open.paths[0].next != null)
+                {
+                    mw.lineDeleter(open.paths[0].line, null);
+                }
                 open.paths.Clear();
                
             }
@@ -155,7 +160,17 @@ namespace WpfApp1
 
         public void deleteOption(object sender, RoutedEventArgs e)
         {
-
+            ListViewItem temp = sender as ListViewItem;
+            path tag = temp.Tag as path;
+            for(int i = 0; i < open.paths.Count; i++)
+            {
+                if (open.paths[i].Equals(tag))
+                {
+                    open.paths.RemoveAt(i);
+                    break;
+                }
+            }
+            refresher(open);
         }
 
         public void refresher()
@@ -168,21 +183,29 @@ namespace WpfApp1
 
         public void listBuilder(unitDialogue pointa)
         {
-            opts.Items.Clear();
-            hmm.Children.Remove(opts);
+            ListView temp = new ListView();
+            
+            
             for(int i = 0; i < pointa.paths.Count; i++)
             {
-                opts.Items.Add(listItemBuilder(pointa.paths[i].optname.ToString()+"\t\t\t"+(pointa.paths[i].next==null?"NULL":pointa.paths[i].next.ToString())));
-            }
-            hmm.Children.Add(opts);
-        }
+                ListViewItem lmao = new ListViewItem();
+                StackPanel cols = new StackPanel();
+                cols.Orientation = Orientation.Horizontal;
 
-        public ListViewItem listItemBuilder(String text)
-        {
-            ListViewItem temp = new ListViewItem();
-            temp.Content = text;
-            temp.ContextMenu = editOpts;
-            return temp;
+                Label optname = new Label();
+                optname.Content = pointa.paths[i].optname.ToString();
+                cols.Children.Add(optname);
+
+                Label pointername = new Label();
+                pointername.Content = (pointa.paths[i].next != null ? pointa.paths[i].next.ToString() : "Null");
+                cols.Children.Add(pointername);
+
+                lmao.Content = cols;
+                temp.Items.Add(lmao);
+            }
+
+            hmm.Children.Add(temp);
+
         }
 
         public void refresher(unitDialogue pointa)
@@ -442,7 +465,6 @@ namespace WpfApp1
             Point canvasRelativePosition = e.GetPosition(jesus);
             for (int i = 0; i < slave.from.Count; i++)
             {
-                //if(slave.from[i].Count)
                 slave.from[i].line.X2 = canvasRelativePosition.X-lmao.X + 75;
                 slave.from[i].line.Y2 = canvasRelativePosition.Y-lmao.Y + 16;
             }
