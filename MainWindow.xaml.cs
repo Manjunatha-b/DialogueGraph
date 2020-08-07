@@ -13,13 +13,9 @@ namespace WpfApp1
     {
 
         public StringBuilder dialogue;
-
         public List<path> paths;
-
         public List<path> from;
-
         public ContextMenu cm;
-
         public int contextItemSelected;
 
         public unitDialogue()
@@ -96,6 +92,7 @@ namespace WpfApp1
             mw = (MainWindow)Application.Current.MainWindow;
             open = null;
             hmm = new StackPanel();
+            
             opts = new ListView();
             enterDialogueInit();
             editOptsInit();
@@ -150,7 +147,7 @@ namespace WpfApp1
             }
             open.paths.Add(new path("ayy"));
             open.ContextBuilder();
-            listBuilder(open);
+            refresher(open);
         }
 
         public void editOption(object sender, RoutedEventArgs e)
@@ -160,16 +157,16 @@ namespace WpfApp1
 
         public void deleteOption(object sender, RoutedEventArgs e)
         {
-            ListViewItem temp = sender as ListViewItem;
-            path tag = temp.Tag as path;
-            for(int i = 0; i < open.paths.Count; i++)
+            Button lmao = sender as Button;
+            path temp = lmao.Tag as path;
+            mw.debug.Content = sender.ToString();
+            if (temp.next != null)
             {
-                if (open.paths[i].Equals(tag))
-                {
-                    open.paths.RemoveAt(i);
-                    break;
-                }
+                mw.lineDeleter(temp.line, null);
+                temp.next = null;
             }
+            open.paths.Remove(temp);
+            open.ContextBuilder();
             refresher(open);
         }
 
@@ -193,12 +190,40 @@ namespace WpfApp1
                 cols.Orientation = Orientation.Horizontal;
 
                 Label optname = new Label();
+                optname.Width = 200;
                 optname.Content = pointa.paths[i].optname.ToString();
                 cols.Children.Add(optname);
 
                 Label pointername = new Label();
+                pointername.Width = 200;
                 pointername.Content = (pointa.paths[i].next != null ? pointa.paths[i].next.ToString() : "Null");
+                pointername.Margin = new Thickness(100,0,100,0);
                 cols.Children.Add(pointername);
+
+                Button editor = new Button();
+                MaterialDesignThemes.Wpf.PackIcon a = new MaterialDesignThemes.Wpf.PackIcon();
+                a.Kind = MaterialDesignThemes.Wpf.PackIconKind.PencilOutline;
+                editor.Content = a;
+                editor.Style = (Style)mw.FindResource("MaterialDesignIconForegroundButton");
+                editor.Width = 26;
+                editor.Height = 26;
+                //editor.Command=MaterialDesignThemes.Wpf.DialogHost.DialogOpenedEvent;
+                editor.Click += editOption;
+                editor.Tag = pointa.paths[i];
+                editor.Margin = new Thickness(100, 0, 50, 0);
+                cols.Children.Add(editor);
+
+                Button deleter = new Button();
+                MaterialDesignThemes.Wpf.PackIcon b = new MaterialDesignThemes.Wpf.PackIcon();
+                b.Kind = MaterialDesignThemes.Wpf.PackIconKind.Delete;
+                deleter.Content = b;
+                deleter.Style = (Style)mw.FindResource("MaterialDesignIconForegroundButton");
+                deleter.Width = 26;
+                deleter.Height = 26;
+                deleter.Tag = pointa.paths[i];
+                deleter.Margin = new Thickness(100, 0, 0, 0);
+                deleter.Click+= deleteOption;
+                cols.Children.Add(deleter);
 
                 lmao.Content = cols;
                 temp.Items.Add(lmao);
@@ -354,7 +379,6 @@ namespace WpfApp1
 
         private void btn_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
-
             IsDragging = true;
             draggedItem = (Button)sender;
             itemRelativePosition = e.GetPosition(draggedItem);
