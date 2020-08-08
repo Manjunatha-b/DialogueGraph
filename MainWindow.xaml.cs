@@ -41,6 +41,10 @@ namespace WpfApp1
             {
                 MenuItem lmao = new MenuItem();
                 lmao.Header = paths[i].optname.ToString();
+                if (paths[i].line != null)
+                {
+                    lmao.IsEnabled = false;
+                }
                 lmao.Click+= linker;
                 lmao.Tag = i;
                 cm.Items.Add(lmao);
@@ -57,6 +61,8 @@ namespace WpfApp1
 
         public void pathLinker(unitDialogue to)
         {
+            if (contextItemSelected == -1)
+                return;
             paths[contextItemSelected].next = to;
             to.from.Add(this.paths[contextItemSelected]);
         }
@@ -333,15 +339,12 @@ namespace WpfApp1
         public void problem_handler(object sender, ContextMenuEventArgs e)
         {
             Button temp = sender as Button;
-            if(linkfrom.contextItemSelected == -1)
+            if(linkfrom!=null && linkfrom.contextItemSelected == -1)
             {
                 linkfrom = null;
                 debug.Content = "NULL";
             }
-            else
-            {
-                debug.Content = linkfrom.contextItemSelected;
-            }
+            
             
         }
 
@@ -367,6 +370,12 @@ namespace WpfApp1
             else
             {
                 linkto = a;
+                if (linkfrom.Equals(linkto))
+                {
+                    linkfrom = null;
+                    linkto = null;
+                    return;
+                }
                 linkfrom.pathLinker(linkto);
 
                 debug.Content = (linkfrom.paths[0].next.dialogue);
@@ -415,7 +424,6 @@ namespace WpfApp1
 
         public void lineCreator(unitDialogue from, unitDialogue to)
         {
-            
 
             Button temp1 = getKey(from);
             Button temp2 = getKey(to);
@@ -442,7 +450,8 @@ namespace WpfApp1
             line.Tag = connx;
             line.MouseRightButtonDown+= new MouseButtonEventHandler(lineDeleter);
             linkfrom.paths[linkfrom.contextItemSelected].line = line;
-
+            linkfrom.ContextBuilder();
+            linkfrom.contextItemSelected = -1;
             jesus.Children.Add(line);
         }
         public void lineDeleter(object sender, MouseEventArgs e)
@@ -475,7 +484,7 @@ namespace WpfApp1
             lmao1[0].paths[indexToDelete1].next = null;
             lmao1[1].from.RemoveAt(indexToDelete2);
 
-
+            lmao1[0].ContextBuilder();
             jesus.Children.Remove(temp);
         }
 
