@@ -5,26 +5,28 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Shapes;
+using System.Windows.Media;
 
 namespace WpfApp1
 {
 
     public class unitDialogue
     {
-
+        public int no;
         public StringBuilder dialogue;
         public List<path> paths;
         public List<path> from;
         public ContextMenu cm;
         public int contextItemSelected;
 
-        public unitDialogue()
+        public unitDialogue(int p1)
         {
             dialogue = new StringBuilder("AYYY");
             paths = new List<path>();
             cm = new ContextMenu();
             contextItemSelected = -1;
             from = new List<path>();
+            no = p1;
 
             MenuItem lmao = new MenuItem();
             lmao.Header = "Default";
@@ -92,12 +94,19 @@ namespace WpfApp1
         public Button addOpt;
         public ListView opts;
         public ContextMenu editOpts;
-        
+        public ScrollViewer slave;
+        public MaterialDesignThemes.Wpf.DialogHost namer;
+
         public DialogueEditor()
         {
             mw = (MainWindow)Application.Current.MainWindow;
             open = null;
             hmm = new StackPanel();
+
+            slave = new ScrollViewer();
+            slave.Height = 190;
+            slave.VerticalScrollBarVisibility = ScrollBarVisibility.Auto;
+            
             
             opts = new ListView();
             enterDialogueInit();
@@ -112,6 +121,7 @@ namespace WpfApp1
             enterDialogue.Style = (Style)Application.Current.FindResource("MaterialDesignFilledTextFieldTextBox");
             enterDialogue.TextWrapping = TextWrapping.Wrap;
             enterDialogue.Margin = new Thickness(5, 0, 5, 10);
+            
         }
 
         public void addOptInit()
@@ -123,6 +133,7 @@ namespace WpfApp1
             addOpt.Content = "Add Options ";
             addOpt.Margin = new Thickness(0, 0, 5, 10);
             addOpt.Click+= addOption;
+            
         }
 
         public void editOptsInit()
@@ -142,14 +153,14 @@ namespace WpfApp1
 
         public void addOption(object Sender, RoutedEventArgs e)
         {
+            object fuck = MaterialDesignThemes.Wpf.DialogHostEx.ShowDialog(hmm,null);
             if (open.paths.Count == 1 && open.paths[0].optname.ToString().Equals("Default"))
             {
                 if (open.paths[0].next != null)
                 {
                     mw.lineDeleter(open.paths[0].line, null);
                 }
-                open.paths.Clear();
-               
+                open.paths.Clear();                               
             }
             open.paths.Add(new path("ayy"));
             open.ContextBuilder();
@@ -234,8 +245,8 @@ namespace WpfApp1
                 lmao.Content = cols;
                 temp.Items.Add(lmao);
             }
-
-            hmm.Children.Add(temp);
+            slave.Content = temp;
+            hmm.Children.Add(slave);
 
         }
 
@@ -243,9 +254,12 @@ namespace WpfApp1
         {
             open = pointa;
             hmm.Children.Clear();
+            slave.Content = null;
             enterDialogue.Text = pointa.dialogue.ToString();
             hmm.Children.Add(enterDialogue);
             hmm.Children.Add(addOpt);
+            if (open != null)
+                MaterialDesignThemes.Wpf.HintAssist.SetHint(enterDialogue, "Dialogue " + open.no.ToString() + "'s Contents");
             listBuilder(pointa);
            
         }
@@ -259,6 +273,7 @@ namespace WpfApp1
         Control draggedItem;
         Point itemRelativePosition;
         bool IsDragging;
+        ScaleTransform scaler;
 
         DialogueEditor only;
         
@@ -270,6 +285,7 @@ namespace WpfApp1
         Dictionary<Button, object> Button_obj_Map;
 
         unitDialogue head;
+        public int nodecount;
 
         public MainWindow()
         {
@@ -277,15 +293,39 @@ namespace WpfApp1
             head = null;
             IsDragging = false;
             Button_obj_Map = new Dictionary<Button, object>();
+            nodecount = 0;
+            scaler = new ScaleTransform();
+            
 
             InitializeComponent();
+            jesus.RenderTransform = scaler;
+            jesus.MouseWheel += scale_Canvas;
+            jesus.PreviewMouseWheel += panner_Canvas;
+
 
             linkfrom = null;
             linkto = null;
             SidePanel.Children.Add(only.hmm);
 
         }
+        public void scale_Canvas(object sender, MouseWheelEventArgs e)
+        {
+            if (e.Delta > 0)
+            {
+                scaler.ScaleX *= 1.1;
+                scaler.ScaleY *= 1.1;
+            }
+            else
+            {
+                scaler.ScaleX /= 1.1;
+                scaler.ScaleY /= 1.1;
+            }
+        }
 
+        public void panner_Canvas(object sender, MouseWheelEventArgs e)
+        {
+
+        }
 
         private void add_Dialogue(object sender, RoutedEventArgs e)
         {
@@ -295,7 +335,8 @@ namespace WpfApp1
             newBtn.Style = (Style)this.FindResource("MaterialDesignFlatMidBgButton");
             newBtn.Content = "Dialogue1";
 
-            unitDialogue obj = new unitDialogue();
+            unitDialogue obj = new unitDialogue(nodecount);
+            nodecount++;
             Button_obj_Map.Add(newBtn, obj);
 
             btn_mapper(newBtn);
@@ -370,7 +411,7 @@ namespace WpfApp1
             else
             {
                 linkto = a;
-                if (linkfrom.Equals(linkto))
+                if (linkfrom.Equals(linkto) || linkfrom.contextItemSelected==-1)
                 {
                     linkfrom = null;
                     linkto = null;
@@ -385,6 +426,8 @@ namespace WpfApp1
                 linkto = null;
             }
         }
+
+
 
         private void btn_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
