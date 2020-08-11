@@ -320,6 +320,11 @@ namespace WpfApp1
                 scaler.ScaleX /= 1.1;
                 scaler.ScaleY /= 1.1;
             }
+
+            if (e.MiddleButton == MouseButtonState.Pressed)
+            {
+                
+            }
         }
 
         public void panner_Canvas(object sender, MouseWheelEventArgs e)
