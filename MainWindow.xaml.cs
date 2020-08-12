@@ -34,6 +34,13 @@ namespace WpfApp1
             lmao.Tag = 0;
             cm.Items.Add(lmao);
             paths.Add(new path("Default"));
+
+            MenuItem delet = new MenuItem();
+            delet.Header = "Delete";
+            delet.Tag = 1;
+            delet.Click += linker;
+            cm.Items.Add(delet);
+
         }
 
         public void ContextBuilder()
@@ -50,7 +57,15 @@ namespace WpfApp1
                 lmao.Click+= linker;
                 lmao.Tag = i;
                 cm.Items.Add(lmao);
+
+
             }
+
+            MenuItem delet = new MenuItem();
+            delet.Header = "Delete";
+            delet.Click+= linker;
+            delet.Tag = paths.Count;
+            cm.Items.Add(delet);
         }
 
         public void linker(object sender, RoutedEventArgs e)
@@ -320,11 +335,7 @@ namespace WpfApp1
                 scaler.ScaleX /= 1.1;
                 scaler.ScaleY /= 1.1;
             }
-
-            if (e.MiddleButton == MouseButtonState.Pressed)
-            {
-                
-            }
+            //jesus.Height = 
         }
 
         public void panner_Canvas(object sender, MouseWheelEventArgs e)
@@ -338,7 +349,7 @@ namespace WpfApp1
             newBtn.Height = 32;
             newBtn.Width = 150;
             newBtn.Style = (Style)this.FindResource("MaterialDesignFlatMidBgButton");
-            newBtn.Content = "Dialogue1";
+            newBtn.Content = "Dialogue "+nodecount.ToString();
 
             unitDialogue obj = new unitDialogue(nodecount);
             nodecount++;
@@ -385,11 +396,39 @@ namespace WpfApp1
         public void problem_handler(object sender, ContextMenuEventArgs e)
         {
             Button temp = sender as Button;
-            if(linkfrom!=null && linkfrom.contextItemSelected == -1)
+
+            if(linkfrom!=null )
             {
-                linkfrom = null;
-                debug.Content = "NULL";
+                if (linkfrom.contextItemSelected == -1)
+                {
+                    linkfrom = null;
+                    debug.Content = "NULL";
+                }
+                else if(linkfrom.contextItemSelected==linkfrom.paths.Count)
+                {
+                    jesus.Children.Remove(temp);
+                    while (linkfrom.paths.Count > 0)
+                    {
+                        if (linkfrom.paths[0].line == null)
+                        {
+                            linkfrom.paths.RemoveAt(0);
+                        }
+                        else
+                        {
+                            lineDeleter(linkfrom.paths[0].line, null);
+                        }
+                    }
+                    while (linkfrom.from.Count > 0)
+                    {
+                        lineDeleter(linkfrom.from[0].line,null);
+                    }
+                    linkfrom.paths = null;
+                    linkfrom.from = null;
+                    Button_obj_Map.Remove(temp);
+                    linkfrom = null;
+                }
             }
+
             
             
         }
