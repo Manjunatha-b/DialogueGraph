@@ -57,8 +57,7 @@ namespace WpfApp1
                 lmao.Click+= linker;
                 lmao.Tag = i;
                 cm.Items.Add(lmao);
-
-
+                
             }
 
             MenuItem delet = new MenuItem();
@@ -85,6 +84,7 @@ namespace WpfApp1
         }
     }
 
+
     public class path
     {
         public StringBuilder optname;
@@ -100,11 +100,15 @@ namespace WpfApp1
     }
 
 
+
+
+
     public class DialogueEditor
     {
         public MainWindow mw;
         public unitDialogue open;
         public StackPanel hmm;
+        public Label dialogName;
         public TextBox enterDialogue;
         public Button addOpt;
         public ListView opts;
@@ -117,6 +121,11 @@ namespace WpfApp1
             mw = (MainWindow)Application.Current.MainWindow;
             open = null;
             hmm = new StackPanel();
+            dialogName = new Label();
+            dialogName.Content = "Null Lad";
+            dialogName.FontSize = 20;
+            dialogName.FontWeight = FontWeights.Bold;
+            dialogName.Margin = new Thickness(4, 0, 0, 5);
 
             slave = new ScrollViewer();
             slave.Height = 190;
@@ -124,6 +133,7 @@ namespace WpfApp1
             
             
             opts = new ListView();
+
             enterDialogueInit();
             editOptsInit();
             addOptInit();
@@ -132,6 +142,7 @@ namespace WpfApp1
 
         public void enterDialogueInit()
         {
+
             enterDialogue = new TextBox();
             enterDialogue.Style = (Style)Application.Current.FindResource("MaterialDesignFilledTextFieldTextBox");
             enterDialogue.TextWrapping = TextWrapping.Wrap;
@@ -270,6 +281,11 @@ namespace WpfApp1
             hmm.Children.Clear();
             slave.Content = null;
             enterDialogue.Text = pointa.dialogue.ToString();
+            if (open != null)
+            {
+                dialogName.Content = "Dialogue " + open.no.ToString();
+            }
+            hmm.Children.Add(dialogName);
             hmm.Children.Add(enterDialogue);
             hmm.Children.Add(addOpt);
             if (open != null)
@@ -281,7 +297,11 @@ namespace WpfApp1
 
 
 
-    // Jesus is the canvas 
+
+
+
+
+ 
     public partial class MainWindow : Window
     {
         Control draggedItem;
@@ -291,15 +311,16 @@ namespace WpfApp1
 
         DialogueEditor only;
         
-        // These two variables keep track of the current dialogue thats being shown in the bottom Editor part of the App
+
         unitDialogue linkfrom;
         unitDialogue linkto;
 
-        // Dictionary that maps the buttons in the canvas to the (Dialogue String and option properties) unitDialogue object
         Dictionary<Button, object> Button_obj_Map;
 
         unitDialogue head;
         public int nodecount;
+
+        Button prevOpen;
 
         public MainWindow()
         {
@@ -309,7 +330,7 @@ namespace WpfApp1
             Button_obj_Map = new Dictionary<Button, object>();
             nodecount = 0;
             scaler = new ScaleTransform();
-            
+            prevOpen = null;
 
             InitializeComponent();
             jesus.LayoutTransform = scaler;
@@ -334,7 +355,7 @@ namespace WpfApp1
                 scaler.ScaleX /= 1.1;
                 scaler.ScaleY /= 1.1;
             }
-           
+            
         }
 
         public void panner_Canvas(object sender, MouseWheelEventArgs e)
@@ -347,7 +368,7 @@ namespace WpfApp1
             Button newBtn = new Button();
             newBtn.Height = 32;
             newBtn.Width = 150;
-            newBtn.Style = (Style)this.FindResource("MaterialDesignFlatMidBgButton");
+            newBtn.Style = (Style)this.FindResource("MaterialDesignFlatLightBgButton");
             newBtn.Content = "Dialogue "+nodecount.ToString();
 
             unitDialogue obj = new unitDialogue(nodecount);
@@ -401,7 +422,6 @@ namespace WpfApp1
                 if (linkfrom.contextItemSelected == -1)
                 {
                     linkfrom = null;
-                    
                 }
                 else if(linkfrom.contextItemSelected==linkfrom.paths.Count)
                 {
@@ -426,15 +446,21 @@ namespace WpfApp1
                     Button_obj_Map.Remove(temp);
                     linkfrom = null;
                 }
+                else {
+                    var converter = new System.Windows.Media.BrushConverter();
+                    var brush = (Brush)converter.ConvertFromString("#f5f0ff");
+                    jesus.Background = brush;
+                }
             }
 
             
-            
+
         }
 
         private void btn_simpleclick(object sender, RoutedEventArgs e)
         {
             Button temp = sender as Button;
+
             dynamic a;
             Button_obj_Map.TryGetValue(temp, out a);
             if (linkfrom == null)
@@ -467,7 +493,13 @@ namespace WpfApp1
                 
                 linkfrom = null;
                 linkto = null;
+                jesus.Background = new SolidColorBrush(Colors.GhostWhite);
             }
+
+            if (prevOpen != null)
+                prevOpen.Style = (Style)this.FindResource("MaterialDesignFlatLightBgButton");
+            temp.Style = (Style)this.FindResource("MaterialDesignFlatDarkBgButton");
+            prevOpen = temp;
         }
 
 
