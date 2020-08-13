@@ -18,18 +18,28 @@
 
 
     <Grid>
+        <materialDesign:Card Background="White" materialDesign:ShadowAssist.ShadowDepth="Depth1" Panel.ZIndex="2" Height="40" VerticalAlignment="Top">
+            <ToolBarTray  Background="Transparent">
+                <ToolBar Height="40" Style="{DynamicResource MaterialDesignToolBar}" ClipToBounds="False" Background="Transparent">
+                    <Button ToolTip="Save" Padding="0" Click="save" >
+                        <materialDesign:PackIcon Kind="ContentSave" />
+                    </Button>
+                </ToolBar>
+            </ToolBarTray>
+        </materialDesign:Card>
         <materialDesign:Card Padding="0" Margin="0" Name ="Backgr">
+            
             <Grid AllowDrop="True" Background="GhostWhite" >
-                <Canvas Background="Transparent" Name="jesus" Panel.ZIndex="10">
-                    
+                <Canvas Background="Transparent" Name="jesus" Panel.ZIndex="10" >
+
                     <Canvas.ContextMenu>
                         <ContextMenu >
                             <MenuItem Header = "Add Dialogue" Click="add_Dialogue"/>
                         </ContextMenu>
                     </Canvas.ContextMenu>
-                    <Label Name="debug"  Content="Label" Canvas.Left="569" Canvas.Top="31"/>
+                    
+                    
                 </Canvas>
-                
 
             </Grid>
         </materialDesign:Card>

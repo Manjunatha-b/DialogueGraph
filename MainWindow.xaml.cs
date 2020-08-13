@@ -184,14 +184,16 @@ namespace WpfApp1
 
         public void editOption(object sender, RoutedEventArgs e)
         {
-
+            TextBox temp = sender as TextBox;
+            path tagla = temp.Tag as path;
+            tagla.optname = new StringBuilder(temp.Text);
         }
 
         public void deleteOption(object sender, RoutedEventArgs e)
         {
             Button lmao = sender as Button;
             path temp = lmao.Tag as path;
-            mw.debug.Content = sender.ToString();
+            
             if (temp.next != null)
             {
                 mw.lineDeleter(temp.line, null);
@@ -221,29 +223,26 @@ namespace WpfApp1
                 StackPanel cols = new StackPanel();
                 cols.Orientation = Orientation.Horizontal;
 
-                Label optname = new Label();
+                Label nums = new Label();
+                nums.Content = (i + 1).ToString() + ".)";
+                nums.Margin = new Thickness(10, 0, 100, 0);
+                cols.Children.Add(nums);
+
+                TextBox optname = new TextBox();
                 optname.Width = 200;
-                optname.Content = pointa.paths[i].optname.ToString();
+                optname.Text = pointa.paths[i].optname.ToString();
+                optname.Tag = pointa.paths[i];
+                optname.TextChanged+= editOption;
                 cols.Children.Add(optname);
+
 
                 Label pointername = new Label();
                 pointername.Width = 200;
-                pointername.Content = (pointa.paths[i].next != null ? pointa.paths[i].next.ToString() : "Null");
+                pointername.Content = (pointa.paths[i].next != null ? ("Dialogue "+pointa.paths[i].next.no.ToString() ): "Null");
                 pointername.Margin = new Thickness(100,0,100,0);
                 cols.Children.Add(pointername);
 
-                Button editor = new Button();
-                MaterialDesignThemes.Wpf.PackIcon a = new MaterialDesignThemes.Wpf.PackIcon();
-                a.Kind = MaterialDesignThemes.Wpf.PackIconKind.PencilOutline;
-                editor.Content = a;
-                editor.Style = (Style)mw.FindResource("MaterialDesignIconForegroundButton");
-                editor.Width = 26;
-                editor.Height = 26;
-                //editor.Command=MaterialDesignThemes.Wpf.DialogHost.DialogOpenedEvent;
-                editor.Click += editOption;
-                editor.Tag = pointa.paths[i];
-                editor.Margin = new Thickness(100, 0, 50, 0);
-                cols.Children.Add(editor);
+                
 
                 Button deleter = new Button();
                 MaterialDesignThemes.Wpf.PackIcon b = new MaterialDesignThemes.Wpf.PackIcon();
@@ -313,7 +312,7 @@ namespace WpfApp1
             
 
             InitializeComponent();
-            jesus.RenderTransform = scaler;
+            jesus.LayoutTransform = scaler;
             jesus.MouseWheel += scale_Canvas;
             jesus.PreviewMouseWheel += panner_Canvas;
 
@@ -335,7 +334,7 @@ namespace WpfApp1
                 scaler.ScaleX /= 1.1;
                 scaler.ScaleY /= 1.1;
             }
-            //jesus.Height = 
+           
         }
 
         public void panner_Canvas(object sender, MouseWheelEventArgs e)
@@ -390,7 +389,7 @@ namespace WpfApp1
             Button temp = sender as Button;
             Button_obj_Map.TryGetValue(temp, out a);       
             linkfrom = a;
-            debug.Content = (linkfrom.dialogue.ToString());
+            
         }
 
         public void problem_handler(object sender, ContextMenuEventArgs e)
@@ -402,7 +401,7 @@ namespace WpfApp1
                 if (linkfrom.contextItemSelected == -1)
                 {
                     linkfrom = null;
-                    debug.Content = "NULL";
+                    
                 }
                 else if(linkfrom.contextItemSelected==linkfrom.paths.Count)
                 {
@@ -463,7 +462,7 @@ namespace WpfApp1
                 }
                 linkfrom.pathLinker(linkto);
 
-                debug.Content = (linkfrom.paths[0].next.dialogue);
+                
                 lineCreator(linkfrom, linkto);
                 
                 linkfrom = null;
@@ -608,6 +607,11 @@ namespace WpfApp1
                     temp = entry.Key;
             }
             return temp;
+        }
+
+        public void save(object sender, RoutedEventArgs e)
+        {
+
         }
     }
 }
