@@ -23,24 +23,32 @@ namespace WpfApp1
         {
             dialogue = new StringBuilder("AYYY");
             paths = new List<path>();
+            from = new List<path>();
             cm = new ContextMenu();
             contextItemSelected = -1;
-            from = new List<path>();
             no = p1;
 
+            defaultContextInit();
+            deleteContextInit();            
+        }
+
+        public void defaultContextInit()
+        {
             MenuItem lmao = new MenuItem();
             lmao.Header = "Default";
-            lmao.Click+=linker;
+            lmao.Click += linker;
             lmao.Tag = 0;
             cm.Items.Add(lmao);
             paths.Add(new path("Default"));
+        }
 
+        public void deleteContextInit()
+        {
             MenuItem delet = new MenuItem();
             delet.Header = "Delete";
-            delet.Tag = 1;
+            delet.Tag = paths.Count;
             delet.Click += linker;
             cm.Items.Add(delet);
-
         }
 
         public void ContextBuilder()
@@ -57,21 +65,14 @@ namespace WpfApp1
                 lmao.Click+= linker;
                 lmao.Tag = i;
                 cm.Items.Add(lmao);
-                
             }
-
-            MenuItem delet = new MenuItem();
-            delet.Header = "Delete";
-            delet.Click+= linker;
-            delet.Tag = paths.Count;
-            cm.Items.Add(delet);
+            deleteContextInit();
         }
 
         public void linker(object sender, RoutedEventArgs e)
         {
             MenuItem temp = sender as MenuItem;
             int index = int.Parse(temp.Tag.ToString());
-            
             contextItemSelected = index;
         }
 
@@ -121,23 +122,24 @@ namespace WpfApp1
             mw = (MainWindow)Application.Current.MainWindow;
             open = null;
             hmm = new StackPanel();
+            opts = new ListView();
+    
+            slave = new ScrollViewer();
+            slave.Height = 190;
+            slave.VerticalScrollBarVisibility = ScrollBarVisibility.Auto;
+
+            headerLabelInit();
+            enterDialogueInit();
+            addOptInit();
+        }
+
+        public void headerLabelInit()
+        {
             dialogName = new Label();
             dialogName.Content = "Null Lad";
             dialogName.FontSize = 20;
             dialogName.FontWeight = FontWeights.Bold;
             dialogName.Margin = new Thickness(4, 0, 0, 5);
-
-            slave = new ScrollViewer();
-            slave.Height = 190;
-            slave.VerticalScrollBarVisibility = ScrollBarVisibility.Auto;
-            
-            
-            opts = new ListView();
-
-            enterDialogueInit();
-            editOptsInit();
-            addOptInit();
-            refresher();
         }
 
         public void enterDialogueInit()
@@ -159,22 +161,6 @@ namespace WpfApp1
             addOpt.Content = "Add Options ";
             addOpt.Margin = new Thickness(0, 0, 5, 10);
             addOpt.Click+= addOption;
-            
-        }
-
-        public void editOptsInit()
-        {
-            editOpts = new ContextMenu();
-            MenuItem edit_option = new MenuItem();
-            edit_option.Header = "Edit";
-            edit_option.Click += editOption;
-
-            MenuItem delete_option = new MenuItem();
-            delete_option.Header = "Delete";
-            delete_option.Click += deleteOption;
-
-            editOpts.Items.Add(edit_option);
-            editOpts.Items.Add(delete_option);
         }
 
         public void addOption(object Sender, RoutedEventArgs e)
@@ -198,6 +184,7 @@ namespace WpfApp1
             TextBox temp = sender as TextBox;
             path tagla = temp.Tag as path;
             tagla.optname = new StringBuilder(temp.Text);
+            open.ContextBuilder();
         }
 
         public void deleteOption(object sender, RoutedEventArgs e)
@@ -213,14 +200,6 @@ namespace WpfApp1
             open.paths.Remove(temp);
             open.ContextBuilder();
             refresher(open);
-        }
-
-        public void refresher()
-        {
-            hmm.Children.Clear();
-            hmm.Children.Add(enterDialogue);
-            hmm.Children.Add(addOpt);
-            hmm.Children.Add(opts);
         }
 
         public void listBuilder(unitDialogue pointa)
@@ -281,23 +260,14 @@ namespace WpfApp1
             hmm.Children.Clear();
             slave.Content = null;
             enterDialogue.Text = pointa.dialogue.ToString();
-            if (open != null)
-            {
-                dialogName.Content = "Dialogue " + open.no.ToString();
-            }
+            dialogName.Content = "Dialogue " + open.no.ToString();
             hmm.Children.Add(dialogName);
             hmm.Children.Add(enterDialogue);
             hmm.Children.Add(addOpt);
-            if (open != null)
-                MaterialDesignThemes.Wpf.HintAssist.SetHint(enterDialogue, "Dialogue " + open.no.ToString() + "'s Contents");
             listBuilder(pointa);
            
         }
     }
-
-
-
-
 
 
 
