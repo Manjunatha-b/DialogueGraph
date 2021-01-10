@@ -21,6 +21,4 @@ Project was originally intended for something else but got sidetracked : /
 
 1. Add panning with middle mouse button.
 1. Write a CSV generator for the graph.
-1. Add GUI dialog box for edit and add option.
 1. Scrap my own code for another project with similar needs.
-1. Also rewrite this code cause idk what ive written. Professor rework within next 5 commits.
