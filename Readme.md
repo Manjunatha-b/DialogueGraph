@@ -3,7 +3,7 @@
 <img src="https://github.com/Manjunatha-b/DialogueGraph/blob/master/Temp.gif" width="650">
 
 ## Introduction
-Created a Windows program with drag drop structure to create a graph data structure for dialogue intensevie games.
+Created a Windows program with drag drop structure to create a graph data structure for dialogue intensive games.
 
 Project was originally intended for something else but got sidetracked : /
 
